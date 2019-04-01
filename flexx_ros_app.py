@@ -87,7 +87,7 @@ class ROSInterface(ROSNode):
 
 if __name__ == '__main__':
 
-    config.hostname = "130.237.218.207"
+    config.hostname = "0.0.0.0"
     config.port = 8097
 
     #rospy.init_node("web_interface", anonymous=True)
