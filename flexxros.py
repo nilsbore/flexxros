@@ -2,11 +2,13 @@
 from flexx import flx
 import rospy
 from external.rospy_message_converter.src.rospy_message_converter import message_converter
+#from external.rospy_message_converter.src.rospy_message_converter import json_message_converter
 import importlib
 import asyncio
 import threading
 import tornado.platform.asyncio as torasync
 import dynamic_reconfigure.client
+import actionlib
 
 #class ROSRelay(flx.Component):
 #
@@ -84,9 +86,42 @@ class ROSDynReconfig:
         self.server_name = server_name
         self.client = dynamic_reconfigure.client.Client(server_name, timeout=30, config_callback=self.callback)
 
+class ROSActionClient:
+
+    def __init__(self, parent, server_name, server_type):
+        self.parent = parent
+        self.server_name = server_name
+        self.server_type = server_type
+        self_type = ROSNode.get_type_from_name(server_type+"Action")
+        self.client = actionlib.SimpleActionClient(server_name, self_type)
+
+    def feedback_cb(self, status, msg):
+        print("Got feedback: ", str(msg))
+        msg_dict = message_converter.convert_ros_message_to_dictionary(msg)
+        self.parent.emit(self.server_name.replace("/", "_")+"_feedback", msg_dict)
+
+    def done_cb(self, status, msg):
+        print("Got result: ", str(msg))
+        msg_dict = message_converter.convert_ros_message_to_dictionary(msg)
+        self.parent.emit(self.server_name.replace("/", "_")+"_done", msg_dict)
+
+    def send_goal(self, msg_dict):
+        #msg = message_converter.convert_dictionary_to_ros_message(self.type, msg_dict)
+        #msg = json_message_converter.convert_json_to_ros_message(self.type, msg_dict)
+        #goal_type = ROSNode.get_type_from_name(self.server_type+"Result") #"Goal")
+        #print(goal_type)
+        #gg = goal_type()
+        #print(gg)
+        msg = message_converter.convert_dictionary_to_ros_message(self.server_type+"Goal", {})
+        print("Waiting for action server for 5s")
+        self.client.wait_for_server(rospy.Duration.from_sec(5))
+        print("Connected to action server")
+        self.client.send_goal(msg, done_cb=self.done_cb, feedback_cb=self.feedback_cb, active_cb=None)
+
 class ROSNode(flx.PyComponent):
 
     publishers = {} # flx.DictProp()
+    action_clients = {}
     reconfig_clients = [] # flx.DictProp()
     subscribers = [] #flx.ListProp()
     #subscribers = flx.DictProp()
@@ -130,6 +165,14 @@ class ROSNode(flx.PyComponent):
         self.publishers[topic] = ROSPublisher(topic, topic_type)
 
     @flx.action
+    def announce_action_client(self, server_name, server_type):
+
+        # this function actually seems superfluous
+        # maybe just check in publish
+        #with self:
+        self.action_clients[server_name] = ROSActionClient(self, server_name, server_type)
+
+    @flx.action
     def announce_reconfig(self, server_name):
         self.reconfig_clients.append(ROSDynReconfig(self, server_name))
         #print("Reconfig clients: ", relay.reconfig_clients)
@@ -150,6 +193,10 @@ class ROSNode(flx.PyComponent):
         pub = self.publishers[topic]
         msg = message_converter.convert_dictionary_to_ros_message(pub.topic_type, data)
         pub.pub.publish(msg)
+
+    @flx.action
+    def send_action_goal(self, server_name, msg):
+        self.action_clients[server_name].send_goal(msg)
 
     def init(self):
         pass
@@ -261,4 +308,50 @@ class ROSDynReconfigWidget(flx.Widget):
 
         for ev in events:
             self.add_children(ev)
+
+class ROSActionClientWidget(flx.Widget):
+
+    CSS = """
+        .flx-LineEdit {
+            rows: 3;
+        }
+        """
+        
+    def init(self, server_name, server_type):
+
+        self.is_init = False
+        self.server_name = server_name
+        self.feedback_react = self.reaction(self._feedback_callback, "!root."+server_name.replace("/", "_")+"_feedback")
+        self.result_react = self.reaction(self._result_callback, "!root."+server_name.replace("/", "_")+"_done")
+
+        print("!root."+server_name.replace("/", "_")+"_result")
+
+        with flx.GroupWidget(title=server_name, flex=1):
+            with flx.FormLayout(flex=1):
+                self.arguments = flx.LineEdit(title="Args", text="")
+                self.feedback = flx.LineEdit(title="Feedback", text="")
+                self.result = flx.LineEdit(title="Result", text="")
+                self.send_goal = flx.Button(text="Send goal")
+                flx.Widget(minsize=40)
+
+        self.root.announce_action_client(self.server_name, server_type)
+
+    @flx.reaction("send_goal.pointer_click")
+    def _send_goal(self, *events):
+        self.root.send_action_goal(self.server_name, self.arguments.text)
+        self.feedback.set_text("Waiting...")
+        self.result.set_text("Waiting...")
+
+    def _feedback_callback(self, *events):
+
+        print("Got new feedback!")
+        for ev in events:
+            self.feedback.set_text(str(ev.status))
+
+    def _result_callback(self, *events):
+
+        print("Got new result!")
+        for ev in events:
+            self.result.set_text(str(ev.status))
+        self.feedback.set_text("")
 
