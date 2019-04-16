@@ -96,20 +96,21 @@ class SamPlots(flx.Widget):
             with flx.VBox(flex=1):
                 self.plot1 = ROSTopicPlotter("/pitch_feedback", "std_msgs/Float64", "data", (-1.6, 1.6))
                 flx.Widget(flex=1)
-                self.plot3 = ROSTopicPlotter("/depth_feedback", "std_msgs/Float64", "data", (0, 6))
+                self.plot2 = ROSTopicPlotter("/depth_feedback", "std_msgs/Float64", "data", (0, 6))
                 flx.Widget(flex=1)
-                self.plot2 = ROSTopicPlotter("/roll_feedback", "std_msgs/Float64", "data", (-1.6, 1.6))
+                self.plot3 = ROSTopicPlotter("/roll_feedback", "std_msgs/Float64", "data", (-1.6, 1.6))
             with flx.VBox(flex=1):
                 self.plot4 = ROSTopicPlotter("/uavcan_lcg_command", "sam_msgs/PercentStamped", "value")
                 flx.Widget(flex=1)
-                self.plot6 = ROSTopicPlotter("/uavcan_vbs_command", "sam_msgs/PercentStamped", "value")
+                self.plot5 = ROSTopicPlotter("/uavcan_vbs_command", "sam_msgs/PercentStamped", "value")
                 flx.Widget(flex=1)
-                self.plot5 = ROSTopicPlotter("/ros_to_uavcan_bridge_node/tcg_command1", "sam_msgs/BallastAngles", "weight_1_offset_radians", (-3.14, 3.14))
+                self.plot6 = ROSTopicPlotter("/ros_to_uavcan_bridge_node/tcg_command1", "sam_msgs/BallastAngles", "weight_1_offset_radians", (-3.14, 3.14))
             with flx.VBox(flex=1):
-                self.plot10 = ROSTopicPlotter("/uavcan_to_ros_bridge_node/lcg_feedback", "sam_msgs/PercentStamped", "value")
-                flx.Widget(minsize=40)
-                self.plot11 = ROSTopicPlotter("/uavcan_to_ros_bridge_node/vbs_feedback", "sam_msgs/PercentStamped", "value")
+                self.plot7 = ROSTopicPlotter("/uavcan_to_ros_bridge_node/lcg_feedback", "sam_msgs/PercentStamped", "value")
                 flx.Widget(flex=1)
+                self.plot8 = ROSTopicPlotter("/uavcan_to_ros_bridge_node/vbs_feedback", "sam_msgs/PercentStamped", "value")
+                flx.Widget(flex=1)
+                flx.Widget(minsize=220)
 
 class SamActuatorBar(flx.Widget):
 
