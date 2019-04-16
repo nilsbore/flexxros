@@ -1,7 +1,6 @@
 from flexx import flx, config
 import rospy
-from flexxros import ROSNode, ROSTopicPlotter, ROSDynReconfigWidget, ROSActionClientWidget #, relay
-import flexxros
+from flexxros.flexxros import ROSNode, ROSTopicPlotter, ROSDynReconfigWidget, ROSActionClientWidget #, relay
 import time
 
 import asyncio

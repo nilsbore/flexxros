@@ -1,7 +1,7 @@
 
 from flexx import flx
 import rospy
-from external.rospy_message_converter.src.rospy_message_converter import message_converter
+from .external.rospy_message_converter.src.rospy_message_converter import message_converter
 #from external.rospy_message_converter.src.rospy_message_converter import json_message_converter
 import importlib
 import asyncio
