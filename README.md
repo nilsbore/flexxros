@@ -11,5 +11,6 @@ pip3 install tornado==5
 ## Running
 
 ```
-./flexx_ros_app.py
+rosrun flexxros sam_dashboard.py
 ```
+This will present a webpage on `http://localhost:8097/`.
