@@ -50,39 +50,35 @@ class ActuatorBox(ROSWidget):
         else:
             self.root.publish(self.setpoint_topic, {'value': float(self.set_slider.value)})
 
-    def _setpoint_callback(self, *events):
+    def _setpoint_callback(self, msg):
 
         if self.is_angles:
-            for ev in events:
-                self.set_slider.set_title(str(int(ev.weight_1_offset_radians)))
-                self.set_slider.set_value(ev.weight_1_offset_radians)
-                self.set_slider2.set_title(str(int(ev.weight_2_offset_radians)))
-                self.set_slider2.set_value(ev.weight_2_offset_radians)
+            self.set_slider.set_title(str(int(msg.weight_1_offset_radians)))
+            self.set_slider.set_value(msg.weight_1_offset_radians)
+            self.set_slider2.set_title(str(int(msg.weight_2_offset_radians)))
+            self.set_slider2.set_value(msg.weight_2_offset_radians)
         else:
-            for ev in events:
-                self.set_slider.set_title(str(int(ev.value)))
-                self.set_slider.set_value(ev.value)
+            self.set_slider.set_title(str(int(msg.value)))
+            self.set_slider.set_value(msg.value)
 
     @flx.reaction("cont_slider.user_done")
     def _cont_slider(self, *events):
 
         self.root.publish(self.cont_setpoint_topic, {'data': float(self.cont_slider.value)})
 
-    def _cont_callback(self, *events):
+    def _cont_callback(self, msg):
 
-        for ev in events:
-            self.cont_slider.set_title(str(int(ev.data)))
-            self.cont_slider.set_value(ev.data)
+        self.cont_slider.set_title(str(int(msg.data)))
+        self.cont_slider.set_value(msg.data)
 
     @flx.reaction("enable_cont.user_checked")
     def _enable_check(self, *events):
 
         self.root.publish(self.cont_enable_topic, {'data': bool(self.enable_cont.checked)})
 
-    def _enable_callback(self, *events):
+    def _enable_callback(self, msg):
 
-        for ev in events:
-            self.enable_cont.set_checked(ev.data)
+        self.enable_cont.set_checked(msg.data)
 
 class SamPlots(flx.Widget):
 

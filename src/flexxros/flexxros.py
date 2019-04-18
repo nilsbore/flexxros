@@ -243,23 +243,20 @@ class ROSTopicPlotter(ROSWidget):
                                                    xdata=[], yrange=yrange, ylabel=topic+"/"+key, xlabel="Time")
         self.subscribe(topic, topic_type, self._callback)
 
-    def _callback(self, *events):
-
-        #print("Got something from pitch feedback: ", events)
+    def _callback(self, msg):
 
         #try:
-        for ev in events:
-            # Prepare plots
-            times = list(self.plot.xdata)
-            times.append(time() - self.start_time)
-            times = times[-self.nsamples:]
-            
-            # cpu data
-            values = list(self.plot.ydata)
-            #values.append(ev.data)
-            values.append(ev[self.key])
-            values = values[-self.nsamples:]
-            self.plot.set_data(times, values)
+        # Prepare plots
+        times = list(self.plot.xdata)
+        times.append(time() - self.start_time)
+        times = times[-self.nsamples:]
+        
+        # cpu data
+        values = list(self.plot.ydata)
+        #values.append(msg.data)
+        values.append(msg[self.key])
+        values = values[-self.nsamples:]
+        self.plot.set_data(times, values)
 
         #except BufferError:
         #    print("Got buffer error!")
