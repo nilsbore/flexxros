@@ -1,12 +1,12 @@
 from flexx import flx, config
 import rospy
-from flexxros.flexxros import ROSNode, ROSTopicPlotter, ROSDynReconfigWidget, ROSActionClientWidget #, relay
+from flexxros.flexxros import ROSNode, ROSWidget, ROSTopicPlotter, ROSDynReconfigWidget, ROSActionClientWidget #, relay
 import time
 
 import asyncio
 import tornado.platform.asyncio as torasync
 
-class ActuatorBox(flx.Widget):
+class ActuatorBox(ROSWidget):
 
     def init(self, name, actuator_type, setpoint_topic,
              feedback_topic, cont_enable_topic,
@@ -35,16 +35,12 @@ class ActuatorBox(flx.Widget):
         self.root.announce_publish(setpoint_topic, actuator_type)
         self.root.announce_publish(cont_setpoint_topic, "std_msgs/Float64")
         self.root.announce_publish(cont_enable_topic, "std_msgs/Bool")
-        self.root.subscribe(setpoint_topic, actuator_type)
-        self.root.subscribe(cont_setpoint_topic, "std_msgs/Float64")
-        self.root.subscribe(cont_enable_topic, "std_msgs/Bool")
-
-        self.setpoint_react = self.reaction(self._setpoint_callback, "!root."+setpoint_topic.replace("/", "_"))
-        self.cont_react = self.reaction(self._cont_callback, "!root."+cont_setpoint_topic.replace("/", "_"))
-        self.enable_react = self.reaction(self._enable_callback, "!root."+cont_enable_topic.replace("/", "_"))
+        self.subscribe(setpoint_topic, actuator_type, self._setpoint_callback)
+        self.subscribe(cont_setpoint_topic, "std_msgs/Float64", self._cont_callback)
+        self.subscribe(cont_enable_topic, "std_msgs/Bool", self._enable_callback)
 
         if is_angles:
-            self.setpoint2_react = self.reaction(self._setpoint_slider, "set_slider2.user_done")
+            self.reaction(self._setpoint_slider, "set_slider2.user_done")
 
     @flx.reaction("set_slider.user_done")
     def _setpoint_slider(self, *events):

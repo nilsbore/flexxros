@@ -156,6 +156,7 @@ class ROSNode(flx.PyComponent):
         #        flx.mutate_dict(self.subscribers, {'mutation': 'insert', 'objects': {topic: ROSSubscriber(self, topic, topic_type)}})
         #    flx.mutate_dict(relay.subscribers, {'mutation': 'insert', 'objects': {topic: ""}})
 
+
     @flx.action
     def announce_publish(self, topic, topic_type):
 
@@ -201,6 +202,15 @@ class ROSNode(flx.PyComponent):
     def init(self):
         pass
 
+class ROSWidget(flx.Widget):
+
+    def init(self):
+        pass
+
+    def subscribe(self, topic, topic_type, cb):
+        self.root.subscribe(topic, topic_type)
+        self.reaction(cb, "!root."+topic.replace("/", "_"))
+
 # Start server in its own thread
 def start_flexx():
     flx.create_server(loop=asyncio.new_event_loop())
@@ -223,18 +233,15 @@ def init_and_spin(node_name, app_type):
     flx.stop()
     t.join()
 
-class ROSTopicPlotter(flx.Widget):
+class ROSTopicPlotter(ROSWidget):
 
     def init(self, topic, topic_type, key="data", yrange=(0, 100), nsamples=100):
         self.key = key
         self.nsamples = nsamples
-        self.root.subscribe(topic, topic_type)
-        #node.subscribe(topic, topic_type)
         self.start_time = time()
-        #self.plot = self.mem_plot = flx.PlotWidget(flex=1, style='width: 500px; height: 320px;',
         self.plot = self.mem_plot = flx.PlotWidget(flex=1, style='width: 400px; height: 220px;',
                                                    xdata=[], yrange=yrange, ylabel=topic+"/"+key, xlabel="Time")
-        self.react = self.reaction(self._callback, "!root."+topic.replace("/", "_"))
+        self.subscribe(topic, topic_type, self._callback)
 
     def _callback(self, *events):
 
