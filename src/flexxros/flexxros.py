@@ -256,12 +256,6 @@ class ROSDynReconfigWidget(flx.Widget):
 
 class ROSActionClientWidget(flx.Widget):
 
-    CSS = """
-        .flx-LineEdit {
-            rows: 3;
-        }
-        """
-        
     def init(self, server_name, server_type):
 
         self.is_init = False
