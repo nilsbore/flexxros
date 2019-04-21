@@ -84,7 +84,9 @@ class ROSActionClient:
     def send_goal(self, msg_dict):
         msg = message_converter.convert_dictionary_to_ros_message(self.server_type+"Goal", {})
         print("Waiting for action server for 5s")
-        self.client.wait_for_server(rospy.Duration.from_sec(5))
+        if not self.client.wait_for_server(rospy.Duration.from_sec(5)):
+            print("Could not connect to server, please start", self.server_name)
+            return
         print("Connected to action server")
         self.client.send_goal(msg, done_cb=self.done_cb, feedback_cb=self.feedback_cb, active_cb=None)
 
@@ -111,17 +113,26 @@ class ROSNode(flx.PyComponent):
     def subscribe(self, topic, topic_type):
 
         # TODO: needs catching
-        self.subscribers.append(ROSSubscriber(self, topic, topic_type))
+        try:
+            self.subscribers.append(ROSSubscriber(self, topic, topic_type))
+        except ImportError:
+            print("Could not subscribe to", topic, ", as", topic_type, "not recognized as type")
 
     @flx.action
     def announce_publish(self, topic, topic_type):
 
-        self.publishers[topic] = ROSPublisher(topic, topic_type)
+        try:
+            self.publishers[topic] = ROSPublisher(topic, topic_type)
+        except ImportError:
+            print("Could not announce", topic, ", as", topic_type, "not recognized as type")
 
     @flx.action
     def announce_action_client(self, server_name, server_type):
 
-        self.action_clients[server_name] = ROSActionClient(self, server_name, server_type)
+        try:
+            self.action_clients[server_name] = ROSActionClient(self, server_name, server_type)
+        except ImportError:
+            print("Could not announce client", server_name, ", as", server_type, "not recognized as type")
 
     @flx.action
     def announce_reconfig(self, server_name):
@@ -134,13 +145,21 @@ class ROSNode(flx.PyComponent):
     @flx.action
     def publish(self, topic, data):
 
-        pub = self.publishers[topic]
+        try:
+            pub = self.publishers[topic]
+        except KeyError:
+            print("Could not publish", topic, "as it is not announced, please call announce_publish before")
+            return
         msg = message_converter.convert_dictionary_to_ros_message(pub.topic_type, data)
         pub.pub.publish(msg)
 
     @flx.action
     def send_action_goal(self, server_name, msg):
-        self.action_clients[server_name].send_goal(msg)
+
+        try:
+            self.action_clients[server_name].send_goal(msg)
+        except KeyError:
+            print("Could not call", server_name, "as it is not announced, please call announce_action_client before")
 
     def init(self):
         pass
