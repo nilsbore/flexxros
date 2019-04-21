@@ -32,9 +32,9 @@ class ActuatorBox(ROSWidget):
                 self.cont_slider = flx.Slider(title="0", min=cont_min, max=cont_max, value=0)
                 flx.Widget(minsize=20)
 
-        self.root.announce_publish(setpoint_topic, actuator_type)
-        self.root.announce_publish(cont_setpoint_topic, "std_msgs/Float64")
-        self.root.announce_publish(cont_enable_topic, "std_msgs/Bool")
+        self.announce_publish(setpoint_topic, actuator_type)
+        self.announce_publish(cont_setpoint_topic, "std_msgs/Float64")
+        self.announce_publish(cont_enable_topic, "std_msgs/Bool")
         self.subscribe(setpoint_topic, actuator_type, self._setpoint_callback)
         self.subscribe(cont_setpoint_topic, "std_msgs/Float64", self._cont_callback)
         self.subscribe(cont_enable_topic, "std_msgs/Bool", self._enable_callback)
@@ -44,14 +44,12 @@ class ActuatorBox(ROSWidget):
 
     @flx.reaction("set_slider.user_done")
     def _setpoint_slider(self, *events):
-
         if self.is_angles:
-            self.root.publish(self.setpoint_topic, {'weight_1_offset_radians': float(self.set_slider.value), 'weight_2_offset_radians': float(self.set_slider2.value)})
+            self.publish(self.setpoint_topic, {'weight_1_offset_radians': float(self.set_slider.value), 'weight_2_offset_radians': float(self.set_slider2.value)})
         else:
-            self.root.publish(self.setpoint_topic, {'value': float(self.set_slider.value)})
+            self.publish(self.setpoint_topic, {'value': float(self.set_slider.value)})
 
     def _setpoint_callback(self, msg):
-
         if self.is_angles:
             self.set_slider.set_title(str(int(msg.weight_1_offset_radians)))
             self.set_slider.set_value(msg.weight_1_offset_radians)
@@ -63,21 +61,17 @@ class ActuatorBox(ROSWidget):
 
     @flx.reaction("cont_slider.user_done")
     def _cont_slider(self, *events):
-
-        self.root.publish(self.cont_setpoint_topic, {'data': float(self.cont_slider.value)})
+        self.publish(self.cont_setpoint_topic, {'data': float(self.cont_slider.value)})
 
     def _cont_callback(self, msg):
-
         self.cont_slider.set_title(str(int(msg.data)))
         self.cont_slider.set_value(msg.data)
 
     @flx.reaction("enable_cont.user_checked")
     def _enable_check(self, *events):
-
-        self.root.publish(self.cont_enable_topic, {'data': bool(self.enable_cont.checked)})
+        self.publish(self.cont_enable_topic, {'data': bool(self.enable_cont.checked)})
 
     def _enable_callback(self, msg):
-
         self.enable_cont.set_checked(msg.data)
 
 class SamPlots(flx.Widget):
@@ -104,7 +98,7 @@ class SamPlots(flx.Widget):
                 flx.Widget(flex=1)
                 flx.Widget(minsize=220)
 
-class SamActuatorBar(flx.Widget):
+class SamActuatorBar(ROSWidget):
 
     def init(self):
 
@@ -126,4 +120,4 @@ class SamActuatorBar(flx.Widget):
 
     @flx.reaction('abort_button.pointer_click')
     def _publish_abort(self, *events):
-        self.root.publish("/abort", {})
+        self.publish("/abort", {})
