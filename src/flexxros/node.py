@@ -18,8 +18,13 @@ class ROSNode(flx.PyComponent):
 
     @flx.action
     def subscribe(self, topic, topic_type):
+        """
+        Subscribe to a topic
 
-        # TODO: needs catching
+        :param topic: the ROS topic name
+        :param topic_type: the ROS message type in form of string, e.g. 'std_msgs/Float32'
+        """
+
         try:
             self.subscribers.append(ROSSubscriber(self, topic, topic_type))
         except ImportError:
@@ -27,6 +32,12 @@ class ROSNode(flx.PyComponent):
 
     @flx.action
     def announce_publish(self, topic, topic_type):
+        """
+        Announce publisher, must be called before publish
+
+        :param topic: the ROS topic name
+        :param topic_type: the ROS message type in form of string, e.g. 'std_msgs/Float32'
+        """
 
         try:
             self.publishers[topic] = ROSPublisher(topic, topic_type)
@@ -51,6 +62,12 @@ class ROSNode(flx.PyComponent):
 
     @flx.action
     def publish(self, topic, data):
+        """
+        Publish a message to a topic, must call announce_publish before this
+
+        :param topic: the ROS topic name
+        :param data: a dictionary version of message, e.g. {data: 0.32}
+        """
 
         try:
             pub = self.publishers[topic]
@@ -79,24 +96,52 @@ class ROSWidget(flx.Widget):
     def init(self):
         pass
 
+    @flx.action
     def announce_publish(self, topic, topic_type):
+        """
+        Announce publisher, must be called before publish
+
+        :param topic: the ROS topic name
+        :param topic_type: the ROS message type in form of string, e.g. 'std_msgs/Float32'
+        """
+
         self.root.announce_publish(topic, topic_type)
 
+    @flx.action
     def publish(self, topic, data):
+        """
+        Publish a message to a topic, must call announce_publish before this
+
+        :param topic: the ROS topic name
+        :param data: a dictionary version of message, e.g. {data: 0.32}
+        """
+
         self.root.publish(topic, data)
 
+    @flx.action
     def subscribe(self, topic, topic_type, cb):
+        """
+        Subscribe to a topic
+
+        :param topic: the ROS topic name
+        :param topic_type: the ROS message type in form of string, e.g. 'std_msgs/Float32'
+        :param cb: a callback handle, must be a method of a subclass of ROSWidget
+        """
         self.root.subscribe(topic, topic_type)
         self.reaction(cb, "!root."+topic.replace("/", "_"))
 
 # Start server in its own thread
 def start_flexx():
+    """
+    Used by init_and_spin to launch flexx
+    """
+
     flx.create_server(loop=asyncio.new_event_loop())
     flx.start()
 
 def init_and_spin(node_name, app_type):
     """
-    The main way of starting your flexxros app, takes the root 
+    The main way of starting your flexxros app 
 
     :param node_name: the ROS node name
     :param app_type: the root widget, must inherit from ROSNode
