@@ -2,6 +2,9 @@ from flexx import flx
 from flexxros.node import ROSWidget
 
 class ROSTopicPlotter(ROSWidget):
+    """
+    flx.Widget subclass that subscribes to a topic and plots it using a flx.PlotWidget
+    """
 
     def init(self, topic, topic_type, key="data", yrange=(0, 100), nsamples=100):
         self.key = key
@@ -29,6 +32,9 @@ class ROSTopicPlotter(ROSWidget):
         #    print("Got buffer error!")
 
 class ROSDynReconfigWidget(flx.Widget):
+    """
+    flx.Widget subclass that dynamically creates a form to set parameters through dynamic reconfigure
+    """
 
     def init(self, server_name):
 
@@ -74,6 +80,9 @@ class ROSDynReconfigWidget(flx.Widget):
             self.add_children(ev)
 
 class ROSActionClientWidget(flx.Widget):
+    """
+    flx.Widget subclass that presents a widget similar to the normal axclient.py
+    """
 
     def init(self, server_name, server_type):
 
