@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
 from flexx import flx, config
-from flexxros import flexxros
-from flexxros.flexxros import ROSNode
+from flexxros import node
+from flexxros.node import ROSNode
 from flexxros.sam_widgets import SamActuatorBar, SamPlots
 
 #import rospy
@@ -37,5 +37,5 @@ if __name__ == '__main__':
     #m = flx.launch(ROSInterface, 'app')
     #flx.run()
     
-    flexxros.init_and_spin("web_interface", ROSInterface)
+    node.init_and_spin("web_interface", ROSInterface)
 

@@ -1,10 +1,6 @@
-from flexx import flx, config
-import rospy
-from flexxros.flexxros import ROSNode, ROSWidget, ROSTopicPlotter, ROSDynReconfigWidget, ROSActionClientWidget #, relay
-import time
-
-import asyncio
-import tornado.platform.asyncio as torasync
+from flexx import flx
+from flexxros.node import ROSWidget
+from flexxros.widgets import ROSTopicPlotter, ROSDynReconfigWidget, ROSActionClientWidget
 
 class ActuatorBox(ROSWidget):
 

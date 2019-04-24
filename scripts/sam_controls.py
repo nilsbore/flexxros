@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
 from flexx import flx, config
-from flexxros import flexxros
-from flexxros.flexxros import ROSNode
+from flexxros import node
+from flexxros.node import ROSNode
 from flexxros.sam_widgets import SamActuatorBar
 
 class SamControls(flx.Widget):
@@ -24,5 +24,5 @@ if __name__ == '__main__':
     config.hostname = "130.237.36.51"
     config.port = 8097
     
-    flexxros.init_and_spin("web_interface", ROSInterface)
+    node.init_and_spin("web_interface", ROSInterface)
 
