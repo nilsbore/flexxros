@@ -20,7 +20,7 @@ This will present a webpage on `http://localhost:8097/`.
 The following script demonstrates a simple publish-subscribe application using flexxros.
 It is identical to `example.py` in the scripts folder.
 
-```
+```python
 from flexx import flx, config
 from flexxros import node
 from flexxros.node import ROSNode, ROSWidget
