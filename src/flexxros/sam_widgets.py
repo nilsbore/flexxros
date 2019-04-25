@@ -108,11 +108,23 @@ class SamActuatorBar(ROSWidget):
             tcg_actuator = ActuatorBox("Roll - TCG", "sam_msgs/BallastAngles",
                                        "/ros_to_uavcan_bridge_node/tcg_command1", "",
                                        "/TCG_pid/pid_enable", "/roll_setpoint", -1.6, 1.6, True)
+            self.leak_button = flx.Button(text="Leaking!", style="background: #ff6961;", disabled=True)
 
             flx.Widget(flex=1)
 
             self.startup_check = ROSActionClientWidget("/sam_startup_check", "sam_msgs/SystemsCheck")
             self.abort_button = flx.Button(text="Abort", style="background: #ff6961;")
+
+            self.subscribe("/uavcan_leak", "sam_msgs/Leak", self.callback)
+
+    def callback(msg):
+
+        if msg.value:
+            self.leak_button.set_text("Leaking!")
+            self.leak_button.apply_style("background: #ff6961;")
+        else:
+            self.leak_button.set_text("No leaks...")
+            self.leak_button.apply_style("background: #008000;")
 
     @flx.reaction('abort_button.pointer_click')
     def _publish_abort(self, *events):
