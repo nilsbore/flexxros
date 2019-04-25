@@ -90,7 +90,7 @@ class ROSActionClient:
         self_type = get_type_from_name(server_type+"Action")
         self.client = actionlib.SimpleActionClient(server_name, self_type)
 
-    def feedback_cb(self, status, msg):
+    def feedback_cb(self, msg):
         print("Got feedback: ", str(msg))
         msg_dict = message_converter.convert_ros_message_to_dictionary(msg)
         self.parent.emit(self.server_name.replace("/", "_")+"_feedback", msg_dict)
