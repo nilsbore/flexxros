@@ -101,10 +101,10 @@ class SamActuatorBar(ROSWidget):
         with flx.VBox(flex=0, minsize=300, style="background: #9d9;"):
             lcg_actuator = ActuatorBox("Pitch - LCG", "sam_msgs/PercentStamped",
                                        "/uavcan_lcg_command", "/uavcan_to_ros_bridge_node/lcg_feedback",
-                                       "/LCG_pid/pid_enable", "/pitch_setpoint", -1.6, 1.6)
+                                       "/LCG_trim/pid_enable", "/pitch_setpoint", -1.6, 1.6)
             vbs_actuator = ActuatorBox("Depth - VBS", "sam_msgs/PercentStamped",
                                        "/uavcan_vbs_command", "/uavcan_to_ros_bridge_node/vbs_feedback",
-                                       "/VBS_pid/pid_enable", "/depth_setpoint", 0, 5)
+                                       "/VBS_depth/pid_enable", "/depth_setpoint", 0, 5)
             tcg_actuator = ActuatorBox("Roll - TCG", "sam_msgs/BallastAngles",
                                        "/ros_to_uavcan_bridge_node/tcg_command1", "",
                                        "/TCG_pid/pid_enable", "/roll_setpoint", -1.6, 1.6, True)
