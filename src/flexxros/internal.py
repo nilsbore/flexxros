@@ -44,14 +44,22 @@ class ROSSubscriber:
         msg_dict = message_converter.convert_ros_message_to_dictionary(msg)
         topic = self.topic.replace("/", "_")
         try:
-            self.parent.emit(topic, msg_dict)
+            for parent in self.parents:
+                parent.emit(topic, msg_dict)
         except BufferError:
             pass
             #print("Caught a buffer error!")
 
+    def add_parent(self, parent):
+
+        if parent not in self.parents:
+            self.parents.append(parent)
+        else:
+            print("Parent already in subscribers, not adding!")
+
     def __init__(self, parent, topic, topic_type):
 
-        self.parent = parent
+        self.parents = [parent]
         self.topic = topic
         self.sub = rospy.Subscriber(topic, get_type_from_name(topic_type), self.callback)
 

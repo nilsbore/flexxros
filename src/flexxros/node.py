@@ -14,7 +14,7 @@ class ROSNode(flx.PyComponent):
     publishers = {}
     action_clients = {}
     reconfig_clients = []
-    subscribers = []
+    subscribers = {}
 
     @flx.action
     def subscribe(self, topic, topic_type):
@@ -25,10 +25,13 @@ class ROSNode(flx.PyComponent):
         :param topic_type: the ROS message type in form of string, e.g. 'std_msgs/Float32'
         """
 
-        try:
-            self.subscribers.append(ROSSubscriber(self, topic, topic_type))
-        except ImportError:
-            print("Could not subscribe to", topic, ", as", topic_type, "not recognized as type")
+        if topic not in self.subscribers:
+            try:
+                self.subscribers[topic] = ROSSubscriber(self, topic, topic_type)
+            except ImportError:
+                print("Could not subscribe to", topic, ", as", topic_type, "not recognized as type")
+        else:
+            self.subscribers[topic].add_parent(self)
 
     @flx.action
     def announce_publish(self, topic, topic_type):
