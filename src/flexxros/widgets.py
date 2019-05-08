@@ -79,7 +79,7 @@ class ROSDynReconfigWidget(flx.Widget):
         for ev in events:
             self.add_children(ev)
 
-class ROSActionClientWidget(flx.Widget):
+class ROSActionClientWidget(ROSWidget):
     """
     flx.Widget subclass that presents a widget similar to the normal axclient.py
     """
@@ -88,10 +88,6 @@ class ROSActionClientWidget(flx.Widget):
 
         self.is_init = False
         self.server_name = server_name
-        self.feedback_react = self.reaction(self._feedback_callback, "!root."+server_name.replace("/", "_")+"_feedback")
-        self.result_react = self.reaction(self._result_callback, "!root."+server_name.replace("/", "_")+"_done")
-
-        print("!root."+server_name.replace("/", "_")+"_result")
 
         with flx.GroupWidget(title=server_name, flex=1):
             with flx.FormLayout(flex=1):
@@ -101,11 +97,11 @@ class ROSActionClientWidget(flx.Widget):
                 self.send_goal = flx.Button(text="Send goal")
                 flx.Widget(minsize=40)
 
-        self.root.announce_action_client(self.server_name, server_type)
+        self.announce_action_client(self.server_name, server_type)
 
     @flx.reaction("send_goal.pointer_click")
     def _send_goal(self, *events):
-        self.root.send_action_goal(self.server_name, self.arguments.text)
+        self.send_action_goal(self.server_name, self.arguments.text, self._feedback_callback, self._result_callback)
         self.feedback.set_text("Waiting...")
         self.result.set_text("Waiting...")
 

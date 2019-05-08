@@ -104,6 +104,32 @@ class ROSWidget(flx.Widget):
         pass
 
     @flx.action
+    def announce_action_client(self, topic, topic_type):
+        """
+        Announce publisher, must be called before publish
+
+        :param topic: the ROS action client name
+        :param topic_type: the ROS action server type in form of string, e.g. 'flexxros/Test'
+        """
+
+        self.root.announce_action_client(topic, topic_type)
+
+    @flx.action
+    def send_action_goal(self, topic, goal, feedback_cb, done_cb):
+        """
+        Subscribe to a topic
+
+        :param topic: the ROS action server name
+        :param goal: a dictionary version of the action goal message, e.g. {data: 0.32}
+        :param feedback_cb: a callback handle, must be a method of a subclass of ROSWidget that takes status, and feedback as arguments
+        :param done_cb: a callback handle, must be a method of a subclass of ROSWidget that takes result as argument
+        """
+
+        self.root.send_action_goal(topic, goal)
+        self.reaction(feedback_cb, "!root."+topic.replace("/", "_")+"_feedback")
+        self.reaction(done_cb, "!root."+topic.replace("/", "_")+"_done")
+
+    @flx.action
     def announce_publish(self, topic, topic_type):
         """
         Announce publisher, must be called before publish
