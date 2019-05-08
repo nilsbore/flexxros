@@ -41,6 +41,8 @@ class ROSNode(flx.PyComponent):
         :param topic: the ROS topic name
         :param topic_type: the ROS message type in form of string, e.g. 'std_msgs/Float32'
         """
+        if topic in self.publishers:
+            return
 
         try:
             self.publishers[topic] = ROSPublisher(topic, topic_type)
@@ -49,12 +51,13 @@ class ROSNode(flx.PyComponent):
 
     @flx.action
     def announce_action_client(self, server_name, server_type):
+        if server_name in self.action_clients:
+            return
 
-        if server_name not in self.action_clients:
-            try:
-                self.action_clients[server_name] = ROSActionClient(server_name, server_type)
-            except ImportError:
-                print("Could not announce client", server_name, ", as", server_type, "not recognized as type")
+        try:
+            self.action_clients[server_name] = ROSActionClient(server_name, server_type)
+        except ImportError:
+            print("Could not announce client", server_name, ", as", server_type, "not recognized as type")
 
     @flx.action
     def announce_reconfig(self, server_name):
