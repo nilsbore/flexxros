@@ -47,10 +47,11 @@ class ROSNode(flx.PyComponent):
     @flx.action
     def announce_action_client(self, server_name, server_type):
 
-        try:
-            self.action_clients[server_name] = ROSActionClient(self, server_name, server_type)
-        except ImportError:
-            print("Could not announce client", server_name, ", as", server_type, "not recognized as type")
+        if server_name not in self.action_clients:
+            try:
+                self.action_clients[server_name] = ROSActionClient(server_name, server_type)
+            except ImportError:
+                print("Could not announce client", server_name, ", as", server_type, "not recognized as type")
 
     @flx.action
     def announce_reconfig(self, server_name):
@@ -81,7 +82,7 @@ class ROSNode(flx.PyComponent):
     def send_action_goal(self, server_name, msg):
 
         try:
-            self.action_clients[server_name].send_goal(msg)
+            self.action_clients[server_name].send_goal(msg, self)
         except KeyError:
             print("Could not call", server_name, "as it is not announced, please call announce_action_client before")
 
@@ -139,15 +140,13 @@ def start_flexx():
     flx.create_server(loop=asyncio.new_event_loop())
     flx.start()
 
-def init_and_spin(node_name, app_type):
+def spin(app_type):
     """
     The main way of starting your flexxros app 
 
-    :param node_name: the ROS node name
     :param app_type: the root widget, must inherit from ROSNode
     """
 
-    rospy.init_node(node_name, anonymous=True)
     asyncio.set_event_loop_policy(torasync.AnyThreadEventLoopPolicy())
 
     # Create component in main thread
@@ -161,3 +160,14 @@ def init_and_spin(node_name, app_type):
 
     flx.stop()
     t.join()
+
+def init_and_spin(node_name, app_type):
+    """
+    The main way of starting your flexxros app 
+
+    :param node_name: the ROS node name
+    :param app_type: the root widget, must inherit from ROSNode
+    """
+
+    rospy.init_node(node_name, anonymous=True)
+    spin(app_type)

@@ -3,6 +3,8 @@ from .external.rospy_message_converter.src.rospy_message_converter import messag
 import importlib
 import actionlib
 import dynamic_reconfigure.client
+import json
+from functools import partial
 
 def get_type_from_name(topic_type):
 
@@ -83,28 +85,33 @@ class ROSActionClient:
     Internal class to handle action clients
     """
 
-    def __init__(self, parent, server_name, server_type):
-        self.parent = parent
+    def __init__(self, server_name, server_type):
         self.server_name = server_name
         self.server_type = server_type
         self_type = get_type_from_name(server_type+"Action")
         self.client = actionlib.SimpleActionClient(server_name, self_type)
 
-    def feedback_cb(self, msg):
+    def feedback_cb(self, parent, msg):
         print("Got feedback: ", str(msg))
         msg_dict = message_converter.convert_ros_message_to_dictionary(msg)
-        self.parent.emit(self.server_name.replace("/", "_")+"_feedback", msg_dict)
+        parent.emit(self.server_name.replace("/", "_")+"_feedback", msg_dict)
 
-    def done_cb(self, status, msg):
+    def done_cb(self, parent, status, msg):
         print("Got result: ", str(msg))
         msg_dict = message_converter.convert_ros_message_to_dictionary(msg)
-        self.parent.emit(self.server_name.replace("/", "_")+"_done", msg_dict)
+        parent.emit(self.server_name.replace("/", "_")+"_done", msg_dict)
 
-    def send_goal(self, msg_dict):
-        msg = message_converter.convert_dictionary_to_ros_message(self.server_type+"Goal", {})
+    def send_goal(self, msg_dict_str, parent):
+        try:
+            msg_dict = json.loads(msg_dict_str)
+        except json.JSONDecodeError:
+            print("Could not decode %s, sending empty goal...", msg_dict_str)
+            msg_dict = {}
+
+        msg = message_converter.convert_dictionary_to_ros_message(self.server_type+"Goal", msg_dict)
         print("Waiting for action server for 5s")
         if not self.client.wait_for_server(rospy.Duration.from_sec(5)):
             print("Could not connect to server, please start", self.server_name)
             return
         print("Connected to action server")
-        self.client.send_goal(msg, done_cb=self.done_cb, feedback_cb=self.feedback_cb, active_cb=None)
+        self.client.send_goal(msg, done_cb=partial(self.done_cb, parent), feedback_cb=partial(self.feedback_cb, parent), active_cb=None)

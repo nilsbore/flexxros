@@ -113,12 +113,12 @@ class ROSActionClientWidget(flx.Widget):
 
         print("Got new feedback!")
         for ev in events:
-            self.feedback.set_text(str(ev.status))
+            self.feedback.set_text(str(ev.items()))
 
     def _result_callback(self, *events):
 
         print("Got new result!")
         for ev in events:
-            self.result.set_text(str(ev.status))
+            self.result.set_text(str(ev.items()))
         self.feedback.set_text("")
 
