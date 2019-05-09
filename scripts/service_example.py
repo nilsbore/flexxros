@@ -26,11 +26,11 @@ class ServiceClientWidget(ROSWidget):
 
     @flx.reaction("send_message.pointer_click")
     def _request_service(self, *events):
-        self.call_service(service_name, "std_srvs/SetBool", {"data": bool(int(self.type_message.text))}, self.callback)
+        self.call_service(service_name, "std_srvs/SetBool", {"data": self.type_message.checked}, self.callback)
 
     def init(self):
         with flx.FormLayout(flex=1, maxsize=400):
-            self.type_message = flx.LineEdit(title="Request (0/1):", text="")
+            self.type_message = flx.CheckBox(title="Checked?")
             self.send_message = flx.Button(text="Request service")
             self.receive_message = flx.Label(title="Response:", text="Waiting for response...")
 
