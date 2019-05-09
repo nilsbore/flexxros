@@ -1,5 +1,6 @@
 # flexxros
-Ros GUI for webpages through flexx. Full documentation at https://nilsbore.github.io/flexxros-docs/
+Ros GUI for webpages through [flexx](https://flexx.readthedocs.io/en/stable/).
+Full documentation at https://nilsbore.github.io/flexxros-docs/
 
 ## Dependencies
 
