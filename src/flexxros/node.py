@@ -4,7 +4,7 @@ from .external.rospy_message_converter.src.rospy_message_converter import messag
 import asyncio
 import threading
 import tornado.platform.asyncio as torasync
-from flexxros.internal import ROSPublisher, ROSSubscriber, ROSActionClient, ROSDynReconfig
+from flexxros.internal import ROSPublisher, ROSSubscriber, ROSActionClient, ROSServiceClient, ROSDynReconfig
 
 class ROSNode(flx.PyComponent):
     """
@@ -15,6 +15,7 @@ class ROSNode(flx.PyComponent):
     action_clients = {}
     reconfig_clients = []
     subscribers = {}
+    service_clients = {}
 
     @flx.action
     def subscribe(self, topic, topic_type):
@@ -85,6 +86,25 @@ class ROSNode(flx.PyComponent):
         pub.pub.publish(msg)
 
     @flx.action
+    def call_service(self, server_name, server_type, req):
+        """
+        Call a ROS service
+
+        :param server_name: the ROS service name
+        :param server_type: the ROS service type, e.g. std_srvs/SetBool
+        :param req: a dictionary version of message, e.g. {data: 0.32}
+        """
+        if server_name not in self.service_clients:
+            try:
+                self.service_clients[server_name] = ROSServiceClient(server_name, server_type)
+            except ImportError:
+                print("Could not get instance of", server_name, ", as", server_type, "not recognized as type")
+
+        srv = self.service_clients[server_name]
+        resp = srv.call_service(req)
+        self.emit(server_name.replace("/", "_")+"_response", resp)
+
+    @flx.action
     def send_action_goal(self, server_name, msg):
 
         try:
@@ -113,6 +133,20 @@ class ROSWidget(flx.Widget):
         """
 
         self.root.announce_action_client(topic, topic_type)
+
+    @flx.action
+    def call_service(self, server_name, server_type, req, cb):
+        """
+        Call a ROS service
+
+        :param server_name: the ROS service name
+        :param server_type: the ROS service type, e.g. std_srvs/SetBool
+        :param req: a dictionary version of message, e.g. {data: 0.32}
+        :param cb: a callback handle, must be a method of a subclass of ROSWidget that takes result as arguments
+        """
+
+        self.reaction(cb, "!root."+server_name.replace("/", "_")+"_response")
+        self.root.call_service(server_name, server_type, req)
 
     @flx.action
     def send_action_goal(self, topic, goal, feedback_cb, done_cb):

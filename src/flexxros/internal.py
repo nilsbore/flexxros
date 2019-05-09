@@ -18,6 +18,18 @@ def get_type_from_name(topic_type):
 
     return getattr(module, class_str)
 
+def get_service_type_from_name(topic_type):
+
+    # this code comes from the mongodb_store package
+    parts = topic_type.split('/')
+    cls_string = "%s.srv._%s.%s" % (parts[0], parts[1], parts[1])
+    class_data = cls_string.split(".")
+    module_path = ".".join(class_data[:-1])
+    class_str = class_data[-1]
+    module = importlib.import_module(module_path)
+
+    return getattr(module, class_str)
+
 class ROSPublisher:
     """
     Internal class to handle publishers
@@ -123,3 +135,26 @@ class ROSActionClient:
             return
         print("Connected to action server")
         self.client.send_goal(msg, done_cb=partial(self.done_cb, parent), feedback_cb=partial(self.feedback_cb, parent), active_cb=None)
+
+class ROSServiceClient:
+    """
+    Internal class to handle service clients
+    """
+
+    def __init__(self, server_name, server_type):
+        self.server_name = server_name
+        self.server_type = server_type
+        self.self_type = get_service_type_from_name(server_type)
+
+    def call_service(self, req_dict):
+
+        req = message_converter.convert_dictionary_to_ros_message(self.server_type, req_dict, kind='request')
+        rospy.wait_for_service(self.server_name)
+        try:
+            client = rospy.ServiceProxy(self.server_name, self.self_type)
+            resp = client(req)
+        except rospy.ServiceException(e):
+            print("Service call failed: %s", e)
+
+        resp_dict = message_converter.convert_ros_message_to_dictionary(resp)
+        return resp_dict
