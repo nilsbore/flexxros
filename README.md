@@ -56,6 +56,7 @@ node.init_and_spin("example_interface", ExampleInterface)
 ## Action service example
 
 The action service example is the same as in `scripts/action_example.py`.
+It presents an interface similar to the default `axclient.py` version.
 
 ```python
 from flexx import config
