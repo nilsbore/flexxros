@@ -105,16 +105,18 @@ class ROSActionClientWidget(ROSWidget):
         self.feedback.set_text("Waiting...")
         self.result.set_text("Waiting...")
 
-    def _feedback_callback(self, *events):
+    def _feedback_callback(self, msg):
 
         print("Got new feedback!")
-        for ev in events:
-            self.feedback.set_text(str(ev.items()))
+        exclude = ["source", "type"]
+        texts = [str(key) + ": " + str(value) for key, value in msg.items() if key not in exclude]
+        self.feedback.set_text(", ".join(texts))
 
-    def _result_callback(self, *events):
+    def _result_callback(self, msg):
 
         print("Got new result!")
-        for ev in events:
-            self.result.set_text(str(ev.items()))
+        exclude = ["source", "type"]
+        texts = [str(key) + ": " + str(value) for key, value in msg.items() if key not in exclude]
+        self.result.set_text(", ".join(texts))
         self.feedback.set_text("")
 
