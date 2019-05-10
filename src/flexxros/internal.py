@@ -109,6 +109,7 @@ class ROSActionClient:
         self.server_name = server_name
         self.server_type = server_type
         self_type = get_type_from_name(server_type+"Action")
+        self.goal_prototype = {"data": json.dumps(message_converter.convert_ros_message_to_dictionary(get_type_from_name(server_type+"Goal")()))}
         self.client = actionlib.SimpleActionClient(server_name, self_type)
 
     def feedback_cb(self, parent, msg):

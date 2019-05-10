@@ -97,13 +97,17 @@ class ROSActionClientWidget(ROSWidget):
                 self.send_goal = flx.Button(text="Send goal")
                 flx.Widget(minsize=40)
 
-        self.announce_action_client(self.server_name, server_type)
+        self.reaction(self._prototype_callback, "!root."+server_name.replace("/", "_")+"_prototype")
+        self.announce_action_client(server_name, server_type)
 
     @flx.reaction("send_goal.pointer_click")
     def _send_goal(self, *events):
         self.send_action_goal(self.server_name, self.arguments.text, self._feedback_callback, self._result_callback)
         self.feedback.set_text("Waiting...")
         self.result.set_text("Waiting...")
+
+    def _prototype_callback(self, msg_string):
+        self.arguments.set_text(msg_string.data)
 
     def _feedback_callback(self, msg):
 

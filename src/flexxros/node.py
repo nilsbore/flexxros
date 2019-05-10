@@ -53,10 +53,12 @@ class ROSNode(flx.PyComponent):
     @flx.action
     def announce_action_client(self, server_name, server_type):
         if server_name in self.action_clients:
+            self.emit(server_name.replace("/", "_")+"_prototype", self.action_clients[server_name].goal_prototype)
             return
 
         try:
             self.action_clients[server_name] = ROSActionClient(server_name, server_type)
+            self.emit(server_name.replace("/", "_")+"_prototype", self.action_clients[server_name].goal_prototype)
         except ImportError:
             print("Could not announce client", server_name, ", as", server_type, "not recognized as type")
 
