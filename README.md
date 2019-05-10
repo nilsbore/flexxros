@@ -1,6 +1,8 @@
 # flexxros
-Ros GUI for webpages through [flexx](https://flexx.readthedocs.io/en/stable/).
-Full documentation at https://nilsbore.github.io/flexxros-docs/
+ROS webpage GUIs through [flexx](https://flexx.readthedocs.io/en/stable/).
+Full documentation at https://nilsbore.github.io/flexxros-docs/ .
+
+flexxros aims to make it dead easy to create small web interfaces for ROS using only python.
 
 ## Dependencies
 
