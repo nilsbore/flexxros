@@ -10,6 +10,8 @@ flexxros aims to make it dead easy to create small web interfaces for ROS using 
 pip3 install flexx rospkg
 pip3 install tornado==5
 ```
+flexxros includes the excellent [rospy_message_converter](https://github.com/uos/rospy_message_converter)
+tool, including some patches for python 3. Their work is gratefully acknowledged.
 
 ## Running
 
