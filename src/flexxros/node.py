@@ -52,6 +52,12 @@ class ROSNode(flx.PyComponent):
 
     @flx.action
     def announce_action_client(self, server_name, server_type):
+        """
+        Announce ROS action client, must be called before publish
+
+        :param server_name: the ROS action server name
+        :param server_type: the ROS action server type in form of string, e.g. 'flexxros/Test'
+        """
         if server_name in self.action_clients:
             self.emit(server_name.replace("/", "_")+"_prototype", self.action_clients[server_name].goal_prototype)
             return
@@ -64,10 +70,16 @@ class ROSNode(flx.PyComponent):
 
     @flx.action
     def announce_reconfig(self, server_name):
+        """
+        Experimental
+        """
         self.reconfig_clients.append(ROSDynReconfig(self, server_name))
 
     @flx.action
     def set_config(self, server_name, config):
+        """
+        Experimental
+        """
         self.reconfig_clients[server_name].client.update_configuration(config)
 
     @flx.action
@@ -108,6 +120,12 @@ class ROSNode(flx.PyComponent):
 
     @flx.action
     def send_action_goal(self, server_name, msg):
+        """
+        Send a ROS action goal, need to call announce_action_client before
+
+        :param server_name: the ROS action server name
+        :param msg: a dictionary version of the action goal message, e.g. {data: 0.32}
+        """
 
         try:
             self.action_clients[server_name].send_goal(msg, self)
@@ -128,7 +146,7 @@ class ROSWidget(flx.Widget):
     @flx.action
     def announce_action_client(self, topic, topic_type):
         """
-        Announce publisher, must be called before publish
+        Announce ROS action client, must be called before publish
 
         :param topic: the ROS action client name
         :param topic_type: the ROS action server type in form of string, e.g. 'flexxros/Test'
@@ -153,7 +171,7 @@ class ROSWidget(flx.Widget):
     @flx.action
     def send_action_goal(self, topic, goal, feedback_cb, done_cb):
         """
-        Subscribe to a topic
+        Send a ROS action goal, need to call announce_action_client before
 
         :param topic: the ROS action server name
         :param goal: a dictionary version of the action goal message, e.g. {data: 0.32}
