@@ -1,6 +1,8 @@
 # flexxros
-Ros GUI for webpages through [flexx](https://flexx.readthedocs.io/en/stable/).
-Full documentation at https://nilsbore.github.io/flexxros-docs/
+ROS webpage GUIs through [flexx](https://flexx.readthedocs.io/en/stable/).
+Full documentation at https://nilsbore.github.io/flexxros-docs/ .
+
+flexxros aims to make it dead easy to create small web interfaces for ROS using only python.
 
 ## Dependencies
 
@@ -8,6 +10,8 @@ Full documentation at https://nilsbore.github.io/flexxros-docs/
 pip3 install flexx rospkg
 pip3 install tornado==5
 ```
+flexxros includes the excellent [rospy_message_converter](https://github.com/uos/rospy_message_converter)
+tool, including some patches for python 3. Their work is gratefully acknowledged.
 
 ## Running
 
