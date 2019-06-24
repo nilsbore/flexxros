@@ -37,7 +37,9 @@ class ROSInterface(ROSNode):
 
 if __name__ == '__main__':
 
+    rospy.init_node("web_interface", anonymous=True)
+
     config.hostname = rospy.get_param('~host_ip', "127.0.0.1")
     config.port = rospy.get_param('~app_port', 8097)
 
-    node.init_and_spin("web_interface", ROSInterface)
+    node.spin(ROSInterface)
