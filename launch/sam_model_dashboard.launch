@@ -1,0 +1,32 @@
+<launch>
+
+  <arg name="host_ip" default="127.0.0.1"/>
+  <arg name="app_port" default="8097"/>
+  <arg name="rosbridge_port" default="9090"/>
+  <arg name="resources_port" default="9091"/>
+  <arg name="robot_description" default="/robot_description"/>
+  <arg name="base_link" default="/base_link"/>
+
+  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
+    <arg name="address" value="$(arg host_ip)"/>
+    <arg name="port" value="$(arg rosbridge_port)"/>
+  </include>
+
+  <node pkg="tf2_web_republisher" type="tf2_web_republisher" name="tf2_web_republisher" output="screen"/>
+
+  <node pkg="flexxros" type="robot_description_saver.py" name="robot_description_saver" output="screen">
+    <param name="robot_description" value="$(arg robot_description)"/>
+    <param name="flexxros_description" value="/flexxros_description"/>
+    <param name="resources_port" value="$(arg resources_port)"/>
+  </node>
+
+  <node pkg="flexxros" type="sam_model.py" name="sam_model_dashboard" output="screen">
+    <param name="host_ip" value="$(arg host_ip)"/>
+    <param name="resources_port" value="$(arg resources_port)"/>
+    <param name="rosbridge_port" value="$(arg resources_port)"/>
+    <param name="app_port" value="$(arg app_port)"/>
+    <param name="base_link" value="$(arg base_link)"/>
+    <param name="robot_description_description" value="/flexxros_description"/>
+  </node>
+
+</launch>
