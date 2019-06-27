@@ -2,6 +2,40 @@ from flexx import flx
 from flexxros.node import ROSWidget
 from flexxros.widgets import ROSTopicPlotter, ROSDynReconfigWidget, ROSActionClientWidget
 
+class GenericActuatorBox(ROSWidget):
+
+    def init(self, name, topic, topic_type, actuator_settings):
+        self.topic = topic
+        with flx.GroupWidget(title=name, flex=1):
+            with flx.FormLayout(flex=1):
+                self.sliders = []
+                self.members = []
+                for settings in actuator_settings:
+                    self.sliders.append(flx.Slider(title=settings["name"], min=settings["min"], max=settings["max"], value=0))
+                    if "type" in settings:
+                        self.members.append((settings["member"], settings["type"]))
+                    else:
+                        self.members.append((settings["member"], "float"))
+                #flx.Widget(minsize=10)
+
+        self.announce_publish(topic, topic_type)
+        self.subscribe(topic, topic_type, self._setpoint_callback)
+
+    @flx.reaction("sliders*.user_done")
+    def _setpoint_slider(self, *events):
+        msg = {}
+        for mem, slider in zip(self.members, self.sliders):
+            if mem[1] == "int":
+                msg[mem[0]] = int(slider.value)
+            else:
+                msg[mem[0]] = slider.value
+        self.publish(self.topic, msg)
+
+    def _setpoint_callback(self, msg):
+        for mem, slider in zip(self.members, self.sliders):
+            slider.set_value(msg[mem[0]])
+
+
 class ActuatorBox(ROSWidget):
 
     def init(self, name, actuator_type, setpoint_topic,
@@ -99,6 +133,13 @@ class SamActuatorBar(ROSWidget):
     def init(self):
 
         with flx.VBox(flex=0, minsize=300, style="background: #9d9;"):
+            self.thruster_angles = GenericActuatorBox("Thruster Angles", "/uavcan_vector_command", "sam_msgs/ThrusterAngles",
+                                                      [{"name": "Hori.", "member": "thruster_horizontal_radians", "min": -1., "max": 1.},
+                                                       {"name": "Vert.", "member": "thruster_vertical_radians", "min": -1., "max": 1.}])
+            self.thruster_rpms = GenericActuatorBox("Thruster RPMs", "/uavcan_rpm_command", "sam_msgs/ThrusterRPMs",
+                                                    [{"name": "Front", "member": "thruster_1_rpm", "min": -100, "max": 100, "type": "int"},
+                                                     {"name": "Back", "member": "thruster_2_rpm", "min": -100, "max": 100, "type": "int"}])
+            self.leak_button = flx.Button(text="No leaks...", style="background: #008000;", disabled=True)
             lcg_actuator = ActuatorBox("Pitch - LCG", "sam_msgs/PercentStamped",
                                        "/uavcan_lcg_command", "/uavcan_to_ros_bridge_node/lcg_feedback",
                                        "/LCG_trim/pid_enable", "/pitch_setpoint", -1.6, 1.6)
@@ -108,7 +149,6 @@ class SamActuatorBar(ROSWidget):
             tcg_actuator = ActuatorBox("Roll - TCG", "sam_msgs/BallastAngles",
                                        "/ros_to_uavcan_bridge_node/tcg_command1", "",
                                        "/TCG_pid/pid_enable", "/roll_setpoint", -1.6, 1.6, True)
-            self.leak_button = flx.Button(text="No leaks...", style="background: #008000;", disabled=True)
 
             flx.Widget(flex=1)
 
