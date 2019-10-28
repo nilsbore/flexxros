@@ -134,8 +134,8 @@ class SamActuatorBar(ROSWidget):
 
         with flx.VBox(flex=0, minsize=300, style="background: #9d9;"):
             self.thruster_angles = GenericActuatorBox("Thruster Angles", "/uavcan_vector_command", "sam_msgs/ThrusterAngles",
-                                                      [{"name": "Hori.", "member": "thruster_horizontal_radians", "min": -1., "max": 1.},
-                                                       {"name": "Vert.", "member": "thruster_vertical_radians", "min": -1., "max": 1.}])
+                                                      [{"name": "Hori.", "member": "thruster_horizontal_radians", "min": -0.1, "max": 0.18},
+                                                       {"name": "Vert.", "member": "thruster_vertical_radians", "min": -0.1, "max": 0.15}])
             self.thruster_rpms = GenericActuatorBox("Thruster RPMs", "/uavcan_rpm_command", "sam_msgs/ThrusterRPMs",
                                                     [{"name": "Front", "member": "thruster_1_rpm", "min": -100, "max": 100, "type": "int"},
                                                      {"name": "Back", "member": "thruster_2_rpm", "min": -100, "max": 100, "type": "int"}])
