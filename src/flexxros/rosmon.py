@@ -126,10 +126,11 @@ class ROSMonLaunchWidget(ROSWidget):
 class ROSMonDashboardWidget(flx.Widget):
 
     @flx.reaction("!root.add_launch")
-    def _add_launch(self, ev):
+    def _add_launch(self, *events):
 
-        with self.base_layout:
-            ROSMonLaunchWidget(ev.topic)
+        for ev in events:
+            with self.base_layout:
+                ROSMonLaunchWidget(ev.topic)
 
     def init(self):
         with flx.VBox(flex=1):
