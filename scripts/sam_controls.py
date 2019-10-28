@@ -23,7 +23,7 @@ class ROSInterface(ROSMonNode):
 
 if __name__ == '__main__':
 
-    config.hostname = "localhost" #"130.237.36.51"
+    config.hostname = "130.237.36.51"
     config.port = 8097
     
     node.init_and_spin("web_interface", ROSInterface)
