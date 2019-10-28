@@ -4,6 +4,7 @@ from flexx import flx, config
 from flexxros import node
 from flexxros.node import ROSNode
 from flexxros.sam_widgets import SamActuatorBar
+from flexxros.rosmon import ROSMonNode, ROSMonDashboardWidget
 
 class SamControls(flx.Widget):
 
@@ -11,9 +12,10 @@ class SamControls(flx.Widget):
         
         with flx.HBox():
             actuator_bar = SamActuatorBar()
-            flx.Widget(flex=1)
+            launch_dashboard = ROSMonDashboardWidget(flex=1)
+            #flx.Widget(flex=1)
 
-class ROSInterface(ROSNode):
+class ROSInterface(ROSMonNode):
 
     def init(self):
 
@@ -21,7 +23,7 @@ class ROSInterface(ROSNode):
 
 if __name__ == '__main__':
 
-    config.hostname = "130.237.36.51"
+    config.hostname = "localhost" #"130.237.36.51"
     config.port = 8097
     
     node.init_and_spin("web_interface", ROSInterface)
