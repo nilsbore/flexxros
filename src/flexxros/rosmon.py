@@ -80,8 +80,10 @@ class ROSMonLaunchWidget(ROSWidget):
     def _request_service(self, *events):
 
         if self.start_stop.text == "Start":
+            self.launch_state.set_text("STARTING...")
             self.root.rosmon_launch(self.service_name, 1) #ROSMonNodeWidget.node_actions["STOP"])
         else:
+            self.launch_state.set_text("STOPPING...")
             self.root.rosmon_launch(self.service_name, 2) #ROSMonNodeWidget.node_actions["STOP"])
 
     @flx.reaction("expand.pointer_click")
@@ -157,7 +159,8 @@ class ROSMonNode(ROSNode):
         msg = rospy.wait_for_message(topic, rosmon_msgs.msg.State, timeout=None)
         for nstate in msg.nodes:
 
-            if nstate.state != desired_state:
+            # If not in desired state, or if not desired state is IDLE (0) and node CRASHED (2)
+            if nstate.state != desired_state and not (desired_state == 0 and nstate.state == 2):
                 rospy.wait_for_service(service_name)
                 start_stop = rospy.ServiceProxy(service_name, rosmon_msgs.srv.StartStop)
                 try:
@@ -166,7 +169,8 @@ class ROSMonNode(ROSNode):
                     print("Service did not process request: " + str(exc))
 
             new_state = nstate
-            while new_state.state != desired_state:
+            # If not in desired state, or if not desired state is IDLE (0) and node CRASHED (2)
+            while new_state.state != desired_state and not (desired_state == 0 and new_state.state == 2):
                 new_msg = rospy.wait_for_message(topic, rosmon_msgs.msg.State, timeout=None)
                 new_state = next(n for n in new_msg.nodes if n.name == nstate.name)
 
