@@ -152,10 +152,10 @@ class SamActuatorBar(ROSWidget):
 
             flx.Widget(flex=1)
 
-            self.startup_check = ROSActionClientWidget("/sam_startup_check", "sam_msgs/SystemsCheck")
+            self.startup_check = ROSActionClientWidget("/sam/startup_check", "sam_msgs/SystemsCheck")
             self.abort_button = flx.Button(text="Abort", style="background: #ff6961;")
 
-            self.subscribe("/uavcan_leak", "sam_msgs/Leak", self.callback)
+            self.subscribe("/sam/core/leak_fb", "sam_msgs/Leak", self.callback)
 
     def callback(msg):
 
