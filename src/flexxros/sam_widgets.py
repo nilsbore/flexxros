@@ -116,15 +116,15 @@ class SamPlots(flx.Widget):
                 flx.Widget(flex=1)
                 self.plot3 = ROSTopicPlotter("/roll_feedback", "std_msgs/Float64", "data", (-1.6, 1.6))
             with flx.VBox(flex=1):
-                self.plot4 = ROSTopicPlotter("/uavcan_lcg_command", "sam_msgs/PercentStamped", "value")
+                self.plot4 = ROSTopicPlotter("/sam/core/lcg_cmd", "sam_msgs/PercentStamped", "value")
                 flx.Widget(flex=1)
-                self.plot5 = ROSTopicPlotter("/uavcan_vbs_command", "sam_msgs/PercentStamped", "value")
+                self.plot5 = ROSTopicPlotter("/sam/core/vbs_cmd", "sam_msgs/PercentStamped", "value")
                 flx.Widget(flex=1)
-                self.plot6 = ROSTopicPlotter("/ros_to_uavcan_bridge_node/tcg_command1", "sam_msgs/BallastAngles", "weight_1_offset_radians", (-3.14, 3.14))
+                self.plot6 = ROSTopicPlotter("/sam/core/tcg_cmd", "sam_msgs/BallastAngles", "weight_1_offset_radians", (-3.14, 3.14))
             with flx.VBox(flex=1):
-                self.plot7 = ROSTopicPlotter("/uavcan_to_ros_bridge_node/lcg_feedback", "sam_msgs/PercentStamped", "value")
+                self.plot7 = ROSTopicPlotter("/sam/core/lcg_fb", "sam_msgs/PercentStamped", "value")
                 flx.Widget(flex=1)
-                self.plot8 = ROSTopicPlotter("/uavcan_to_ros_bridge_node/vbs_feedback", "sam_msgs/PercentStamped", "value")
+                self.plot8 = ROSTopicPlotter("/sam/core/vbs_fb", "sam_msgs/PercentStamped", "value")
                 flx.Widget(flex=1)
                 flx.Widget(minsize=220)
 
@@ -133,29 +133,29 @@ class SamActuatorBar(ROSWidget):
     def init(self):
 
         with flx.VBox(flex=0, minsize=300, style="background: #9d9;"):
-            self.thruster_angles = GenericActuatorBox("Thruster Angles", "/uavcan_vector_command", "sam_msgs/ThrusterAngles",
+            self.thruster_angles = GenericActuatorBox("Thruster Angles", "/sam/core/thrust_vector_cmd", "sam_msgs/ThrusterAngles",
                                                       [{"name": "Hori.", "member": "thruster_horizontal_radians", "min": -0.1, "max": 0.18},
                                                        {"name": "Vert.", "member": "thruster_vertical_radians", "min": -0.1, "max": 0.15}])
-            self.thruster_rpms = GenericActuatorBox("Thruster RPMs", "/uavcan_rpm_command", "sam_msgs/ThrusterRPMs",
+            self.thruster_rpms = GenericActuatorBox("Thruster RPMs", "/sam/core/rpm_cmd", "sam_msgs/ThrusterRPMs",
                                                     [{"name": "Front", "member": "thruster_1_rpm", "min": -100, "max": 100, "type": "int"},
                                                      {"name": "Back", "member": "thruster_2_rpm", "min": -100, "max": 100, "type": "int"}])
             self.leak_button = flx.Button(text="No leaks...", style="background: #008000;", disabled=True)
             lcg_actuator = ActuatorBox("Pitch - LCG", "sam_msgs/PercentStamped",
-                                       "/uavcan_lcg_command", "/uavcan_to_ros_bridge_node/lcg_feedback",
-                                       "/LCG_trim/pid_enable", "/pitch_setpoint", -1.6, 1.6)
+                                       "/sam/core/lcg_cmd", "/sam/core/lcg_fb",
+                                       "/sam/ctrl/lcg/pid_enable", "/sam/ctrl/lcg/setpoint", -1.6, 1.6)
             vbs_actuator = ActuatorBox("Depth - VBS", "sam_msgs/PercentStamped",
-                                       "/uavcan_vbs_command", "/uavcan_to_ros_bridge_node/vbs_feedback",
-                                       "/VBS_depth/pid_enable", "/depth_setpoint", 0, 5)
+                                       "/sam/core/vbs_cmd", "/sam/core/vbs_fb",
+                                       "/sam/ctrl/vbs/pid_enable", "/sam/ctrl/vbs/setpoint", 0, 5)
             tcg_actuator = ActuatorBox("Roll - TCG", "sam_msgs/BallastAngles",
-                                       "/ros_to_uavcan_bridge_node/tcg_command1", "",
-                                       "/TCG_pid/pid_enable", "/roll_setpoint", -1.6, 1.6, True)
+                                       "/sam/core/tcg_cmd", "",
+                                       "/sam/ctrl/tcg/pid_enable", "/sam/ctrl/tcg/setpoint", -1.6, 1.6, True)
 
             flx.Widget(flex=1)
 
-            self.startup_check = ROSActionClientWidget("/sam_startup_check", "sam_msgs/SystemsCheck")
+            self.startup_check = ROSActionClientWidget("/sam/startup_check", "sam_msgs/SystemsCheck")
             self.abort_button = flx.Button(text="Abort", style="background: #ff6961;")
 
-            self.subscribe("/uavcan_leak", "sam_msgs/Leak", self.callback)
+            self.subscribe("/sam/core/leak_fb", "sam_msgs/Leak", self.callback)
 
     def callback(msg):
 
