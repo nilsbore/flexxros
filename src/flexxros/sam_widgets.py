@@ -128,11 +128,59 @@ class SamPlots(flx.Widget):
                 flx.Widget(flex=1)
                 flx.Widget(minsize=220)
 
+class SamInfoDash(ROSWidget):
+
+    def init(self):
+
+        with flx.HBox(flex=1, style="background: #e6e6df;"):
+            with flx.FormLayout(flex=1):
+                self.heading = flx.LineEdit(title="Heading", text="")
+                self.pitch = flx.LineEdit(title="Pitch", text="")
+                self.roll = flx.LineEdit(title="Roll", text="")
+                flx.Widget(minsize=40)
+            with flx.FormLayout(flex=1):
+                self.depth = flx.LineEdit(title="Depth", text="")
+                self.lat = flx.LineEdit(title="Lat", text="")
+                self.lon = flx.LineEdit(title="Lon", text="")
+                flx.Widget(minsize=40)
+            with flx.FormLayout(flex=1):
+                self.xvel = flx.LineEdit(title="X vel", text="")
+                self.yvel = flx.LineEdit(title="Y vel", text="")
+                self.zvel = flx.LineEdit(title="Z vel", text="")
+                flx.Widget(minsize=40)
+            with flx.FormLayout(flex=1):
+                self.gps_status = flx.LineEdit(title="GPS Status", text="")
+                self.dvl_status = flx.LineEdit(title="DVL Status", text="")
+                self.battery_status = flx.LineEdit(title="Battery level", text="")
+                flx.Widget(minsize=40)
+            with flx.FormLayout(flex=1):
+                self.vbs_fb = flx.LineEdit(title="VBS fb", text="")
+                self.lcg_fb = flx.LineEdit(title="LCG fb", text="")
+                self.rpm_fb = flx.LineEdit(title="RPM fb", text="")
+                flx.Widget(minsize=40)
+            
+        self.subscribe("/sam/core/gps", "sensor_msgs/NavSatFix", self.gps_callback)
+        self.subscribe("/sam/ctrl/depth_feedback", "std_msgs/Float64", self.depth_callback)
+
+
+    def depth_callback(self, msg):
+
+        self.depth.set_text(str(msg.data))
+
+    def gps_callback(self, msg):
+        
+        # no fix
+        if msg.status.status == -1:
+            self.gps_status.apply_style("background: #ffb3af;")
+        else:
+            self.gps_status.apply_style("background: #bbffbb;")
+            self.gps_status.set_text("Lat: " + str(msg.latitude) + ", Lon:" + str(msg.longitude))
+
 class SamActuatorBar(ROSWidget):
 
     def init(self):
 
-        with flx.VBox(flex=0, minsize=300, style="background: #9d9;"):
+        with flx.VBox(flex=0, minsize=400, style="background: #9d9;"):
             self.thruster_angles = GenericActuatorBox("Thruster Angles", "/sam/core/thrust_vector_cmd", "sam_msgs/ThrusterAngles",
                                                       [{"name": "Hori.", "member": "thruster_horizontal_radians", "min": -0.1, "max": 0.18},
                                                        {"name": "Vert.", "member": "thruster_vertical_radians", "min": -0.1, "max": 0.15}])
