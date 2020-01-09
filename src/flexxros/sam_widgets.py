@@ -160,12 +160,40 @@ class SamInfoDash(ROSWidget):
                 flx.Widget(minsize=40)
             
         self.subscribe("/sam/core/gps", "sensor_msgs/NavSatFix", self.gps_callback)
+        self.subscribe("/sam/core/battery_fb", "sensor_msgs/BatteryState", self.battery_callback)
         self.subscribe("/sam/ctrl/depth_feedback", "std_msgs/Float64", self.depth_callback)
-
+        self.subscribe("/sam/ctrl/pitch_feedback", "std_msgs/Float64", self.pitch_callback)
+        self.subscribe("/sam/ctrl/roll_feedback", "std_msgs/Float64", self.roll_callback)
+        self.subscribe("/sam/ctrl/yaw_feedback", "std_msgs/Float64", self.yaw_callback)
 
     def depth_callback(self, msg):
 
-        self.depth.set_text(str(msg.data))
+        self.depth.set_text("%.02f" % msg.data)
+
+    def depth_callback(self, msg):
+
+        self.depth.set_text("%.02f" % msg.data)
+
+    def pitch_callback(self, msg):
+
+        self.pitch.set_text("%.02f" % (180./3.14*msg.data))
+
+    def roll_callback(self, msg):
+
+        self.roll.set_text("%.02f" % (180./3.14*msg.data))
+
+    def yaw_callback(self, msg):
+
+        self.heading.set_text("%.02f" % (90. - 180./3.14*msg.data))
+
+    def battery_callback(self, msg):
+        
+        # battery health not good
+        if msg.power_supply_health != 1 or msg.percentage < 20.:
+            self.battery_status.apply_style("background: #ffb3af;")
+        else:
+            self.battery_status.apply_style("background: #bbffbb;")
+        self.battery_status.set_text("%.02f%" % msg.percentage)
 
     def gps_callback(self, msg):
         
@@ -174,7 +202,7 @@ class SamInfoDash(ROSWidget):
             self.gps_status.apply_style("background: #ffb3af;")
         else:
             self.gps_status.apply_style("background: #bbffbb;")
-            self.gps_status.set_text("Lat: " + str(msg.latitude) + ", Lon:" + str(msg.longitude))
+            self.gps_status.set_text("Lat: %.04f, Lon: %.04f" % (msg.latitude, msg.longitude))
 
 class SamActuatorBar(ROSWidget):
 
