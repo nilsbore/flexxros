@@ -137,8 +137,8 @@ class SamActuatorBar(ROSWidget):
                                                       [{"name": "Hori.", "member": "thruster_horizontal_radians", "min": -0.1, "max": 0.18},
                                                        {"name": "Vert.", "member": "thruster_vertical_radians", "min": -0.1, "max": 0.15}])
             self.thruster_rpms = GenericActuatorBox("Thruster RPMs", "/sam/core/rpm_cmd", "sam_msgs/ThrusterRPMs",
-                                                    [{"name": "Front", "member": "thruster_1_rpm", "min": -100, "max": 100, "type": "int"},
-                                                     {"name": "Back", "member": "thruster_2_rpm", "min": -100, "max": 100, "type": "int"}])
+                                                    [{"name": "Front", "member": "thruster_1_rpm", "min": -1000, "max": 1000, "type": "int"},
+                                                     {"name": "Back", "member": "thruster_2_rpm", "min": -1000, "max": 1000, "type": "int"}])
             self.leak_button = flx.Button(text="No leaks...", style="background: #008000;", disabled=True)
             lcg_actuator = ActuatorBox("Pitch - LCG", "sam_msgs/PercentStamped",
                                        "/sam/core/lcg_cmd", "/sam/core/lcg_fb",
@@ -155,9 +155,10 @@ class SamActuatorBar(ROSWidget):
             self.startup_check = ROSActionClientWidget("/sam/startup_check", "sam_msgs/SystemsCheck")
             self.abort_button = flx.Button(text="Abort", style="background: #ff6961;")
 
-            self.subscribe("/sam/core/leak_fb", "sam_msgs/Leak", self.callback)
+            self.subscribe("/sam/core/leak_fb", "sam_msgs/Leak", self.leak_callback)
+            self.announce_publish("/abort", "std_msgs/Empty")
 
-    def callback(msg):
+    def leak_callback(msg):
 
         if msg.value:
             self.leak_button.set_text("Leaking!")
@@ -165,4 +166,5 @@ class SamActuatorBar(ROSWidget):
 
     @flx.reaction('abort_button.pointer_click')
     def _publish_abort(self, *events):
+        print("Abort button was clicked!")
         self.publish("/abort", {})
