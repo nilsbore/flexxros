@@ -46,12 +46,16 @@ class ROSSubscriber:
     Internal class to handle subscribers
     """
 
-    def _callback(self, *events):
-        topic = self.topic.replace("/", "_")
-        for ev in events:
-            self.parent.emit(topic, ev)
+    #def _callback(self, *events):
+    #    topic = self.topic.replace("/", "_")
+    #    for ev in events:
+    #        self.parent.emit(topic, ev)
 
     def callback(self, msg):
+
+        msg_time = rospy.get_time()
+        if self.interval != -1 and self.last_emitted > 0. and msg_time - self.last_emitted < self.interval:
+            return
         
         msg_dict = message_converter.convert_ros_message_to_dictionary(msg)
         topic = self.topic.replace("/", "_")
@@ -62,6 +66,8 @@ class ROSSubscriber:
             pass
             #print("Caught a buffer error!")
 
+        self.last_emitted = msg_time
+
     def add_parent(self, parent):
 
         if parent not in self.parents:
@@ -69,10 +75,12 @@ class ROSSubscriber:
         else:
             print("Parent already in subscribers, not adding!")
 
-    def __init__(self, parent, topic, topic_type):
+    def __init__(self, parent, topic, topic_type, hz):
 
         self.parents = [parent]
         self.topic = topic
+        self.interval = 1./hz if hz > 0 else -1
+        self.last_emitted = 0.
         self.sub = rospy.Subscriber(topic, get_type_from_name(topic_type), self.callback)
 
 class ROSDynReconfig:
