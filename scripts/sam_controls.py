@@ -30,7 +30,7 @@ if __name__ == '__main__':
     rospy.init_node("web_interface", anonymous=True)
 
     config.hostname = rospy.get_param("~display_ip", "192.168.2.61")
-    config.port = 8098
+    config.port = 8097
     
     node.spin(ROSInterface)
 
