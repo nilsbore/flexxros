@@ -177,6 +177,7 @@ class ROSMonNode(ROSNode):
     def maybe_subscribe(self, events):
 
         topics = rospy.get_published_topics()
+        topics.sort()
 
         for topic in topics:
             if topic[1] != "rosmon_msgs/State" or topic[0] in self.feedback_topics:

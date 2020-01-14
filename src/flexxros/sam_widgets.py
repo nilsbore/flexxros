@@ -134,39 +134,55 @@ class SamInfoDash(ROSWidget):
 
         with flx.HBox(flex=1, style="background: #e6e6df;"):
             with flx.FormLayout(flex=1):
+                flx.Widget(minsize=20)
                 self.heading = flx.LineEdit(title="Heading", text="")
                 self.pitch = flx.LineEdit(title="Pitch", text="")
                 self.roll = flx.LineEdit(title="Roll", text="")
                 flx.Widget(minsize=40)
             with flx.FormLayout(flex=1):
+                flx.Widget(minsize=20)
                 self.depth = flx.LineEdit(title="Depth", text="")
-                self.lat = flx.LineEdit(title="X", text="")
-                self.lon = flx.LineEdit(title="Y", text="")
+                self.xpos = flx.LineEdit(title="X", text="")
+                self.ypos = flx.LineEdit(title="Y", text="")
                 flx.Widget(minsize=40)
             with flx.FormLayout(flex=1):
+                flx.Widget(minsize=20)
                 self.xvel = flx.LineEdit(title="X vel", text="")
                 self.yvel = flx.LineEdit(title="Y vel", text="")
                 self.zvel = flx.LineEdit(title="Z vel", text="")
                 flx.Widget(minsize=40)
             with flx.FormLayout(flex=1):
+                flx.Widget(minsize=20)
                 self.gps_status = flx.LineEdit(title="GPS Status", text="")
                 self.dvl_status = flx.LineEdit(title="DVL Status", text="")
                 self.battery_status = flx.LineEdit(title="Battery level", text="")
                 flx.Widget(minsize=40)
             with flx.FormLayout(flex=1):
+                flx.Widget(minsize=20)
                 self.vbs_fb = flx.LineEdit(title="VBS fb", text="")
                 self.lcg_fb = flx.LineEdit(title="LCG fb", text="")
                 self.rpm_fb = flx.LineEdit(title="RPM fb", text="")
                 flx.Widget(minsize=40)
             
+        # We subscribe to these topics at full frquency (no extra arg)
         self.subscribe("/sam/core/gps", "sensor_msgs/NavSatFix", self.gps_callback)
         self.subscribe("/sam/core/battery_fb", "sensor_msgs/BatteryState", self.battery_callback)
-        self.subscribe("/sam/core/vbs_fb", "sam_msgs/PercentStamped", self.vbs_callback)
-        self.subscribe("/sam/core/lcg_fb", "sam_msgs/PercentStamped", self.lcg_callback)
-        self.subscribe("/sam/ctrl/depth_feedback", "std_msgs/Float64", self.depth_callback)
-        self.subscribe("/sam/ctrl/pitch_feedback", "std_msgs/Float64", self.pitch_callback)
-        self.subscribe("/sam/ctrl/roll_feedback", "std_msgs/Float64", self.roll_callback)
-        self.subscribe("/sam/ctrl/yaw_feedback", "std_msgs/Float64", self.yaw_callback)
+        # We only subscribe to these topics at 1hz
+        self.subscribe("/sam/dr/odom", "nav_msgs/Odometry", self.odom_callback, 1.)
+        self.subscribe("/sam/core/vbs_fb", "sam_msgs/PercentStamped", self.vbs_callback, 1.)
+        self.subscribe("/sam/core/lcg_fb", "sam_msgs/PercentStamped", self.lcg_callback, 1.)
+        self.subscribe("/sam/ctrl/depth_feedback", "std_msgs/Float64", self.depth_callback, 1.)
+        self.subscribe("/sam/ctrl/pitch_feedback", "std_msgs/Float64", self.pitch_callback, 1.)
+        self.subscribe("/sam/ctrl/roll_feedback", "std_msgs/Float64", self.roll_callback, 1.)
+        self.subscribe("/sam/ctrl/yaw_feedback", "std_msgs/Float64", self.yaw_callback, 1.)
+
+    def odom_callback(self, msg):
+
+        self.xpos.set_text("%.02fm" % msg.pose.pose.position.x)
+        self.ypos.set_text("%.02fm" % msg.pose.pose.position.y)
+        self.xvel.set_text("%.02fm/s" % msg.twist.twist.linear.x)
+        self.yvel.set_text("%.02fm/s" % msg.twist.twist.linear.y)
+        self.zvel.set_text("%.02fm/s" % msg.twist.twist.linear.z)
 
     def vbs_callback(self, msg):
 
@@ -178,7 +194,7 @@ class SamInfoDash(ROSWidget):
 
     def depth_callback(self, msg):
 
-        self.depth.set_text("%.02f" % msg.data)
+        self.depth.set_text("%.02fm" % msg.data)
 
     def pitch_callback(self, msg):
 

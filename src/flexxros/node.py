@@ -18,7 +18,7 @@ class ROSNode(flx.PyComponent):
     service_clients = {}
 
     @flx.action
-    def subscribe(self, topic, topic_type):
+    def subscribe(self, topic, topic_type, hz):
         """
         Subscribe to a topic
 
@@ -28,7 +28,7 @@ class ROSNode(flx.PyComponent):
 
         if topic not in self.subscribers:
             try:
-                self.subscribers[topic] = ROSSubscriber(self, topic, topic_type)
+                self.subscribers[topic] = ROSSubscriber(self, topic, topic_type, hz)
             except ImportError:
                 print("Could not subscribe to", topic, ", as", topic_type, "not recognized as type")
         else:
@@ -206,7 +206,7 @@ class ROSWidget(flx.Widget):
         self.root.publish(topic, data)
 
     @flx.action
-    def subscribe(self, topic, topic_type, cb):
+    def subscribe(self, topic, topic_type, cb, hz=-1):
         """
         Subscribe to a topic
 
@@ -214,7 +214,7 @@ class ROSWidget(flx.Widget):
         :param topic_type: the ROS message type in form of string, e.g. 'std_msgs/Float32'
         :param cb: a callback handle, must be a method of a subclass of ROSWidget
         """
-        self.root.subscribe(topic, topic_type)
+        self.root.subscribe(topic, topic_type, hz)
         self.reaction(cb, "!root."+topic.replace("/", "_"))
 
 # Start server in its own thread
