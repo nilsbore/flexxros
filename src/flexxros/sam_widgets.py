@@ -140,8 +140,8 @@ class SamInfoDash(ROSWidget):
                 flx.Widget(minsize=40)
             with flx.FormLayout(flex=1):
                 self.depth = flx.LineEdit(title="Depth", text="")
-                self.lat = flx.LineEdit(title="Lat", text="")
-                self.lon = flx.LineEdit(title="Lon", text="")
+                self.lat = flx.LineEdit(title="X", text="")
+                self.lon = flx.LineEdit(title="Y", text="")
                 flx.Widget(minsize=40)
             with flx.FormLayout(flex=1):
                 self.xvel = flx.LineEdit(title="X vel", text="")
@@ -161,14 +161,20 @@ class SamInfoDash(ROSWidget):
             
         self.subscribe("/sam/core/gps", "sensor_msgs/NavSatFix", self.gps_callback)
         self.subscribe("/sam/core/battery_fb", "sensor_msgs/BatteryState", self.battery_callback)
+        self.subscribe("/sam/core/vbs_fb", "sam_msgs/PercentStamped", self.vbs_callback)
+        self.subscribe("/sam/core/lcg_fb", "sam_msgs/PercentStamped", self.lcg_callback)
         self.subscribe("/sam/ctrl/depth_feedback", "std_msgs/Float64", self.depth_callback)
         self.subscribe("/sam/ctrl/pitch_feedback", "std_msgs/Float64", self.pitch_callback)
         self.subscribe("/sam/ctrl/roll_feedback", "std_msgs/Float64", self.roll_callback)
         self.subscribe("/sam/ctrl/yaw_feedback", "std_msgs/Float64", self.yaw_callback)
 
-    def depth_callback(self, msg):
+    def vbs_callback(self, msg):
 
-        self.depth.set_text("%.02f" % msg.data)
+        self.vbs_fb.set_text("%.02f%" % msg.value)
+
+    def lcg_callback(self, msg):
+
+        self.lcg_fb.set_text("%.02f%" % msg.value)
 
     def depth_callback(self, msg):
 
