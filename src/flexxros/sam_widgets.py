@@ -128,11 +128,93 @@ class SamPlots(flx.Widget):
                 flx.Widget(flex=1)
                 flx.Widget(minsize=220)
 
+class SamInfoDash(ROSWidget):
+
+    def init(self):
+
+        with flx.HBox(flex=1, style="background: #e6e6df;"):
+            with flx.FormLayout(flex=1):
+                self.heading = flx.LineEdit(title="Heading", text="")
+                self.pitch = flx.LineEdit(title="Pitch", text="")
+                self.roll = flx.LineEdit(title="Roll", text="")
+                flx.Widget(minsize=40)
+            with flx.FormLayout(flex=1):
+                self.depth = flx.LineEdit(title="Depth", text="")
+                self.lat = flx.LineEdit(title="X", text="")
+                self.lon = flx.LineEdit(title="Y", text="")
+                flx.Widget(minsize=40)
+            with flx.FormLayout(flex=1):
+                self.xvel = flx.LineEdit(title="X vel", text="")
+                self.yvel = flx.LineEdit(title="Y vel", text="")
+                self.zvel = flx.LineEdit(title="Z vel", text="")
+                flx.Widget(minsize=40)
+            with flx.FormLayout(flex=1):
+                self.gps_status = flx.LineEdit(title="GPS Status", text="")
+                self.dvl_status = flx.LineEdit(title="DVL Status", text="")
+                self.battery_status = flx.LineEdit(title="Battery level", text="")
+                flx.Widget(minsize=40)
+            with flx.FormLayout(flex=1):
+                self.vbs_fb = flx.LineEdit(title="VBS fb", text="")
+                self.lcg_fb = flx.LineEdit(title="LCG fb", text="")
+                self.rpm_fb = flx.LineEdit(title="RPM fb", text="")
+                flx.Widget(minsize=40)
+            
+        self.subscribe("/sam/core/gps", "sensor_msgs/NavSatFix", self.gps_callback)
+        self.subscribe("/sam/core/battery_fb", "sensor_msgs/BatteryState", self.battery_callback)
+        self.subscribe("/sam/core/vbs_fb", "sam_msgs/PercentStamped", self.vbs_callback)
+        self.subscribe("/sam/core/lcg_fb", "sam_msgs/PercentStamped", self.lcg_callback)
+        self.subscribe("/sam/ctrl/depth_feedback", "std_msgs/Float64", self.depth_callback)
+        self.subscribe("/sam/ctrl/pitch_feedback", "std_msgs/Float64", self.pitch_callback)
+        self.subscribe("/sam/ctrl/roll_feedback", "std_msgs/Float64", self.roll_callback)
+        self.subscribe("/sam/ctrl/yaw_feedback", "std_msgs/Float64", self.yaw_callback)
+
+    def vbs_callback(self, msg):
+
+        self.vbs_fb.set_text("%.02f%" % msg.value)
+
+    def lcg_callback(self, msg):
+
+        self.lcg_fb.set_text("%.02f%" % msg.value)
+
+    def depth_callback(self, msg):
+
+        self.depth.set_text("%.02f" % msg.data)
+
+    def pitch_callback(self, msg):
+
+        self.pitch.set_text("%.02f" % (180./3.14*msg.data))
+
+    def roll_callback(self, msg):
+
+        self.roll.set_text("%.02f" % (180./3.14*msg.data))
+
+    def yaw_callback(self, msg):
+
+        self.heading.set_text("%.02f" % (90. - 180./3.14*msg.data))
+
+    def battery_callback(self, msg):
+        
+        # battery health not good
+        if msg.power_supply_health != 1 or msg.percentage < 20.:
+            self.battery_status.apply_style("background: #ffb3af;")
+        else:
+            self.battery_status.apply_style("background: #bbffbb;")
+        self.battery_status.set_text("%.02f%" % msg.percentage)
+
+    def gps_callback(self, msg):
+        
+        # no fix
+        if msg.status.status == -1:
+            self.gps_status.apply_style("background: #ffb3af;")
+        else:
+            self.gps_status.apply_style("background: #bbffbb;")
+            self.gps_status.set_text("Lat: %.04f, Lon: %.04f" % (msg.latitude, msg.longitude))
+
 class SamActuatorBar(ROSWidget):
 
     def init(self):
 
-        with flx.VBox(flex=0, minsize=300, style="background: #9d9;"):
+        with flx.VBox(flex=0, minsize=400, style="background: #9d9;"):
             self.thruster_angles = GenericActuatorBox("Thruster Angles", "/sam/core/thrust_vector_cmd", "sam_msgs/ThrusterAngles",
                                                       [{"name": "Hori.", "member": "thruster_horizontal_radians", "min": -0.1, "max": 0.18},
                                                        {"name": "Vert.", "member": "thruster_vertical_radians", "min": -0.1, "max": 0.15}])

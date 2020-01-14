@@ -3,7 +3,7 @@
 from flexx import flx, config
 from flexxros import node
 from flexxros.node import ROSNode
-from flexxros.sam_widgets import SamActuatorBar
+from flexxros.sam_widgets import SamActuatorBar, SamInfoDash
 from flexxros.rosmon import ROSMonNode, ROSMonDashboardWidget
 import rospy
 
@@ -13,8 +13,11 @@ class SamControls(flx.Widget):
         
         with flx.HBox():
             actuator_bar = SamActuatorBar()
-            launch_dashboard = ROSMonDashboardWidget(flex=1)
             #flx.Widget(flex=1)
+            with flx.VBox(flex=1):
+                launch_dashboard = ROSMonDashboardWidget(flex=1)
+                info_dash = SamInfoDash(flex=0)
+
 
 class ROSInterface(ROSMonNode):
 
