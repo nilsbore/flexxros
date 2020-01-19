@@ -248,9 +248,12 @@ class SamActuatorBar(ROSWidget):
                                        "/sam/core/tcg_cmd", "",
                                        "/sam/ctrl/tcg/pid_enable", "/sam/ctrl/tcg/setpoint", -1.6, 1.6, True)
 
-            flx.Widget(flex=1)
 
-            self.startup_check = ROSActionClientWidget("/sam/startup_check", "sam_msgs/SystemsCheck")
+            #flx.Widget(flex=1)
+            with flx.TabLayout(flex=1):
+                self.startup_check = ROSActionClientWidget("/sam/startup_check", "sam_msgs/SystemsCheck", title="Startup check", flex=1)
+                self.gps_fix_action = ROSActionClientWidget("/sam/gps_fix_server", "sam_msgs/GetGPSFix", title="Get GPS fix", flex=1)
+
             self.abort_button = flx.Button(text="Abort", style="background: #ff6961;")
 
             self.subscribe("/sam/core/leak_fb", "sam_msgs/Leak", self.leak_callback)
