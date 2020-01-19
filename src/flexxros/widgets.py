@@ -103,7 +103,7 @@ class ROSActionClientWidget(ROSWidget):
     @flx.reaction("send_goal.pointer_click")
     def _send_goal(self, *events):
         self.send_action_goal(self.server_name, self.arguments.text, self._feedback_callback, self._result_callback)
-        self.feedback.set_text("Waiting...")
+        self.feedback.set_text("Waiting, is %s running?" % self.server_name)
         self.result.set_text("Waiting...")
 
     def _prototype_callback(self, msg_string):
