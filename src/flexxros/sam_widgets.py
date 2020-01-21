@@ -167,14 +167,29 @@ class SamInfoDash(ROSWidget):
         # We subscribe to these topics at full frquency (no extra arg)
         self.subscribe("/sam/core/gps", "sensor_msgs/NavSatFix", self.gps_callback)
         self.subscribe("/sam/core/battery_fb", "sensor_msgs/BatteryState", self.battery_callback)
+        self.subscribe("/sam/core/dvl_enabled", "std_msgs/Bool", self.dvl_enabled_callback)
+        self.subscribe("/sam/core/dvl", "cola2_msgs/DVL", self.dvl_callback)
+
         # We only subscribe to these topics at 1hz
         self.subscribe("/sam/dr/odom", "nav_msgs/Odometry", self.odom_callback, 1.)
         self.subscribe("/sam/core/vbs_fb", "sam_msgs/PercentStamped", self.vbs_callback, 1.)
         self.subscribe("/sam/core/lcg_fb", "sam_msgs/PercentStamped", self.lcg_callback, 1.)
+        self.subscribe("/sam/core/rpm_fb", "sam_msgs/ThrusterRPMs", self.rpm_callback, 1.)
         self.subscribe("/sam/ctrl/depth_feedback", "std_msgs/Float64", self.depth_callback, 1.)
         self.subscribe("/sam/ctrl/pitch_feedback", "std_msgs/Float64", self.pitch_callback, 1.)
         self.subscribe("/sam/ctrl/roll_feedback", "std_msgs/Float64", self.roll_callback, 1.)
         self.subscribe("/sam/ctrl/yaw_feedback", "std_msgs/Float64", self.yaw_callback, 1.)
+
+    def dvl_enabled_callback(self, msg):
+
+        if msg.data:
+            self.dvl_status.apply_style("background: #bbffbb;")
+        else:
+            self.dvl_status.apply_style("background: #ffb3af;")
+
+    def dvl_callback(self, msg):
+
+        self.dvl_status.set_text("X vel: %.02f, Alt: %.02f" % (msg.velocity.x, msg.altitude))
 
     def odom_callback(self, msg):
 
@@ -191,6 +206,10 @@ class SamInfoDash(ROSWidget):
     def lcg_callback(self, msg):
 
         self.lcg_fb.set_text("%.02f%" % msg.value)
+
+    def rpm_callback(self, msg):
+
+        self.rpm_fb.set_text("%drpm, %drpm" % (msg.thruster_1_rpm, msg.thruster_2_rpm))
 
     def depth_callback(self, msg):
 
